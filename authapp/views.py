@@ -1,11 +1,12 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer
+from .models import Contact
+from .serializers import UserSerializer, ContactSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -35,3 +36,15 @@ class RegisterView(generics.CreateAPIView):
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactViewSet(viewsets.ModelViewSet):
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Contact.objects.all()  # Füge dies hinzu
+
+    def get_queryset(self):
+        return Contact.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

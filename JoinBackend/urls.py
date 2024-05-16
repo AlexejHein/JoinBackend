@@ -16,9 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from authapp.views import ContactViewSet
+
+router = DefaultRouter()
+router.register(r'contacts', ContactViewSet, basename='contact')  # Füge `basename` hinzu
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authapp.urls')),
+    path('api/', include(router.urls)),  # ändere dies, um den API-Pfad zu trennen
 ]
+
+
 
