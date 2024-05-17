@@ -41,10 +41,11 @@ class RegisterView(generics.CreateAPIView):
 class ContactViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Contact.objects.all()  # Füge dies hinzu
 
     def get_queryset(self):
-        return Contact.objects.filter(user=self.request.user)
+        # Wenn das user-Feld entfernt wurde, einfach alle Kontakte zurückgeben
+        return Contact.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Wenn das user-Feld entfernt wurde, einfach den Serializer speichern
+        serializer.save()

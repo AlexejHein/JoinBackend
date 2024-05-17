@@ -29,6 +29,9 @@ ALLOWED_HOSTS = []
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:4200',
 ]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

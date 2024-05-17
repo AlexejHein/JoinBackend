@@ -20,12 +20,12 @@ from rest_framework.routers import DefaultRouter
 from authapp.views import ContactViewSet
 
 router = DefaultRouter()
-router.register(r'contacts', ContactViewSet, basename='contact')  # Füge `basename` hinzu
+router.register(r'contacts', ContactViewSet, basename='contact')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authapp.urls')),
-    path('api/', include(router.urls)),  # ändere dies, um den API-Pfad zu trennen
+    path('api/', include(router.urls)),
 ]
 
 
