@@ -43,9 +43,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Wenn das user-Feld entfernt wurde, einfach alle Kontakte zurückgeben
         return Contact.objects.all()
 
     def perform_create(self, serializer):
-        # Wenn das user-Feld entfernt wurde, einfach den Serializer speichern
         serializer.save()
