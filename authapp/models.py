@@ -27,7 +27,21 @@ class Contact(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
-    #user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
+
+
+class Task(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    category = models.CharField(max_length=50)
+    assigned_to = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    due_date = models.DateField()
+    priority = models.CharField(max_length=10)
+
+
+class Subtask(models.Model):
+    task = models.ForeignKey(Task, related_name='subtasks', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    completed = models.BooleanField(default=False)

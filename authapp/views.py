@@ -1,7 +1,7 @@
 from rest_framework import generics, viewsets
 from django.contrib.auth import get_user_model
-from .models import Contact
-from .serializers import UserSerializer, ContactSerializer
+from .models import Contact, Task
+from .serializers import UserSerializer, ContactSerializer, TaskSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -47,3 +47,24 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("Validation errors:", serializer.errors)  # Protokollierung der Validierungsfehler
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        try:
+            serializer.save()
+        except Exception as e:
+            print("Error saving task:", e)  # Protokollierung der Fehler
+            raise
