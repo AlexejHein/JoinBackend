@@ -38,10 +38,11 @@ class SubtaskSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     subtasks = SubtaskSerializer(many=True)
     assigned_to = serializers.SlugRelatedField(slug_field='name', queryset=Contact.objects.all())
+    status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
 
     class Meta:
         model = Task
-        fields = ['title', 'description', 'category', 'assigned_to', 'due_date', 'priority', 'subtasks']
+        fields = ['title', 'description', 'category', 'assigned_to', 'due_date', 'priority', 'status', 'subtasks']
         extra_kwargs = {
             'due_date': {'required': True},
         }
