@@ -1,5 +1,7 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from django.contrib.auth import get_user_model
+from rest_framework.response import Response
+
 from authapp.models import Contact, Task, Subtask
 
 User = get_user_model()
@@ -24,8 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ['id', 'name', 'email', 'phone', ]
-        # read_only_fields = ['user']
+        fields = ['id', 'name', 'email', 'phone']
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
@@ -36,11 +37,14 @@ class SubtaskSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     subtasks = SubtaskSerializer(many=True)
-    assigned_to = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), source='assigned_to.id')
+    assigned_to = serializers.SlugRelatedField(slug_field='name', queryset=Contact.objects.all())
 
     class Meta:
         model = Task
         fields = ['title', 'description', 'category', 'assigned_to', 'due_date', 'priority', 'subtasks']
+        extra_kwargs = {
+            'due_date': {'required': True},
+        }
 
     def create(self, validated_data):
         subtasks_data = validated_data.pop('subtasks')

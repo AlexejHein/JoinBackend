@@ -56,7 +56,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            print("Validation errors:", serializer.errors)  # Protokollierung der Validierungsfehler
+            print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -66,5 +66,5 @@ class TaskViewSet(viewsets.ModelViewSet):
         try:
             serializer.save()
         except Exception as e:
-            print("Error saving task:", e)  # Protokollierung der Fehler
+            print("Error saving task:", e)
             raise
