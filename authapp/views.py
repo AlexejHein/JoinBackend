@@ -1,7 +1,5 @@
 from rest_framework import generics, viewsets
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view
-
 from .models import Contact, Task
 from .serializers import UserSerializer, ContactSerializer, TaskSerializer
 from rest_framework.response import Response
@@ -70,18 +68,3 @@ class TaskViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print("Error saving task:", e)
             raise
-
-
-@api_view(['PUT'])
-def update_task_status(request, pk):
-    try:
-        task = Task.objects.get(pk=pk)
-    except Task.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'PUT':
-        data = request.data
-        task.status = data.get('status', task.status)
-        task.save()
-        serializer = TaskSerializer(task)
-        return Response(serializer.data, status=status.HTTP_200_OK)
