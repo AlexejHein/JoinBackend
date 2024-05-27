@@ -1,9 +1,13 @@
+from django.http import JsonResponse
+from django.views import View
 from rest_framework import generics, viewsets
 from django.contrib.auth import get_user_model
-from .models import Contact, Task
-from .serializers import UserSerializer, ContactSerializer, TaskSerializer
+from rest_framework.generics import get_object_or_404
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from .models import Contact, Task
+from .serializers import UserSerializer, ContactSerializer, TaskSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -68,3 +72,24 @@ class TaskViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print("Error saving task:", e)
             raise
+
+
+class UpdateTaskStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        title = request.data.get('title')
+        due_date = request.data.get('due_date')
+        assigned_to = request.data.get('assigned_to')
+        status = request.data.get('status')
+
+        task = get_object_or_404(Task, title=title, due_date=due_date, assigned_to_id=assigned_to)
+        task.status = status
+        task.save()
+        serializer = TaskSerializer(task)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TestView(View):
+    def get(self, request):
+        return JsonResponse({"message": "Test view is working!"})
