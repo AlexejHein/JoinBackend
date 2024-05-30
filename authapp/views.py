@@ -77,16 +77,30 @@ class TaskViewSet(viewsets.ModelViewSet):
 class UpdateTaskStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def update_task_status(self, task, status):
+        task.status = status
+        task.save()
+        return task
+
     def put(self, request, *args, **kwargs):
         title = request.data.get('title')
         due_date = request.data.get('due_date')
-        assigned_to = request.data.get('assigned_to')
+        assigned_to = request.data.get('assigned_to')  # Assuming this is a string
         status = request.data.get('status')
 
-        task = get_object_or_404(Task, title=title, due_date=due_date, assigned_to_id=assigned_to)
-        task.status = status
-        task.save()
-        serializer = TaskSerializer(task)
+        # Debugging Statements
+        print("Title:", title)
+        print("Due Date:", due_date)
+        print("Assigned To:", assigned_to)
+        print("Status:", status)
+
+        try:
+            task = get_object_or_404(Task, title=title, due_date=due_date, assigned_to__name=assigned_to)
+        except Task.DoesNotExist:
+            return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        updated_task = self.update_task_status(task, status)
+        serializer = TaskSerializer(updated_task)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
