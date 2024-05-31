@@ -42,7 +42,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['title', 'description', 'category', 'assigned_to', 'due_date', 'priority', 'status', 'subtasks']
+        fields = ['id', 'title', 'description', 'category', 'assigned_to', 'due_date', 'priority', 'status', 'subtasks']
         extra_kwargs = {
             'due_date': {'required': True},
         }
@@ -55,23 +55,28 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
-        subtasks_data = validated_data.pop('subtasks')
+        subtasks_data = validated_data.pop('subtasks', None)
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
         instance.category = validated_data.get('category', instance.category)
         instance.assigned_to = validated_data.get('assigned_to', instance.assigned_to)
         instance.due_date = validated_data.get('due_date', instance.due_date)
         instance.priority = validated_data.get('priority', instance.priority)
+        instance.status = validated_data.get('status', instance.status)
         instance.save()
 
-        for subtask_data in subtasks_data:
-            subtask_id = subtask_data.get('id')
-            if subtask_id:
-                subtask = Subtask.objects.get(id=subtask_id, task=instance)
-                subtask.name = subtask_data.get('name', subtask.name)
-                subtask.completed = subtask_data.get('completed', subtask.completed)
-                subtask.save()
-            else:
-                Subtask.objects.create(task=instance, **subtask_data)
+        if subtasks_data is not None:
+            for subtask_data in subtasks_data:
+                subtask_id = subtask_data.get('id')
+                if subtask_id:
+                    try:
+                        subtask = Subtask.objects.get(id=subtask_id, task=instance)
+                    except Subtask.DoesNotExist:
+                        subtask = Subtask.objects.create(task=instance, **subtask_data)
+                    subtask.name = subtask_data.get('name', subtask.name)
+                    subtask.completed = subtask_data.get('completed', subtask.completed)
+                    subtask.save()
+                else:
+                    Subtask.objects.create(task=instance, **subtask_data)
 
         return instance

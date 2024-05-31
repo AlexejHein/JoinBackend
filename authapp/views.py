@@ -72,18 +72,16 @@ class TaskViewSet(viewsets.ModelViewSet):
             raise
 
 
+# authapp/views.py
+
 class UpdateTaskStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, *args, **kwargs):
+    def put(self, request, pk, *args, **kwargs):
         print("Request data:", request.data)  # Debugging-Ausgabe
 
-        task_id = request.data.get('id')
-        if not task_id:
-            return Response({"error": "Missing task ID"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            task = get_object_or_404(Task, id=task_id)
+            task = get_object_or_404(Task, id=pk)
         except Task.DoesNotExist:
             return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
 
