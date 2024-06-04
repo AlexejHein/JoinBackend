@@ -4,8 +4,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Contact, Task
-from .serializers import UserSerializer, ContactSerializer, TaskSerializer
+from .models import Contact, Task, Category
+from .serializers import UserSerializer, ContactSerializer, TaskSerializer, CategorySerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -51,6 +51,17 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
+class CategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Category.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
@@ -66,19 +77,21 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         try:
+            category_data = serializer.validated_data.pop('category', None)
+            if category_data:
+                category, created = Category.objects.get_or_create(**category_data)
+                serializer.validated_data['category'] = category
             serializer.save()
         except Exception as e:
             print("Error saving task:", e)
             raise
 
 
-# authapp/views.py
-
 class UpdateTaskStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk, *args, **kwargs):
-        print("Request data:", request.data)  # Debugging-Ausgabe
+        print("Request data:", request.data)
 
         try:
             task = get_object_or_404(Task, id=pk)

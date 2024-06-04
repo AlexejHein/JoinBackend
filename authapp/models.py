@@ -11,6 +11,14 @@ class Contact(models.Model):
         return self.name
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    color = models.CharField(max_length=7, default='#ffffff')  # Default color white
+
+    def __str__(self):
+        return self.name
+
+
 class Task(models.Model):
     STATUS_CHOICES = [
         ('todo', 'To Do'),
