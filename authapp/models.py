@@ -29,7 +29,7 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=100)
-    categoryColor = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='tasks', default=1)
+    categoryColor = models.CharField(max_length=7, default='#ffffff')  # RGB-Wert
     assigned_to = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='tasks')
     due_date = models.DateField(null=True, blank=True)
     priority = models.CharField(max_length=50)
