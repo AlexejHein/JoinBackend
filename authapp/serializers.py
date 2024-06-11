@@ -46,7 +46,7 @@ class TaskSerializer(serializers.ModelSerializer):
     assigned_to = serializers.SlugRelatedField(slug_field='name', queryset=Contact.objects.all())
     status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
     category = serializers.CharField()
-    categoryColor = CategorySerializer()
+    categoryColor = serializers.CharField()  # Ändern Sie dies in CharField
 
     class Meta:
         model = Task
@@ -60,21 +60,35 @@ class TaskSerializer(serializers.ModelSerializer):
         subtasks_data = validated_data.pop('subtasks')
         category_name = validated_data.pop('category')
         category_color = validated_data.pop('categoryColor', None)
-        category_defaults = {'color': category_color} if category_color else {'color': '#ffffff'}  # Default color white
-        category, created = Category.objects.get_or_create(name=category_name, defaults=category_defaults)
-        task = Task.objects.create(category=category, **validated_data)
+
+        # Definieren Sie 'category' außerhalb der if-Anweisung
+        category = None
+
+        if category_color is not None:
+            category, created = Category.objects.get_or_create(name=category_name, defaults={'color': category_color})
+            validated_data['category'] = category
+        else:
+            # Wenn 'category_color' None ist, suchen Sie nach einer Kategorie mit dem gegebenen Namen
+            category = Category.objects.filter(name=category_name).first()
+
+        # Stellen Sie sicher, dass 'category' einen Wert hat, bevor Sie es verwenden
+        if category is not None:
+            task = Task.objects.create(category=category, **validated_data)
+        else:
+            raise serializers.ValidationError("Category does not exist")
+
         for subtask_data in subtasks_data:
             Subtask.objects.create(task=task, **subtask_data)
+
         return task
 
     def update(self, instance, validated_data):
         subtasks_data = validated_data.pop('subtasks', None)
         category_name = validated_data.pop('category', None)
         category_color = validated_data.pop('categoryColor', None)
+
         if category_name:
-            category_defaults = {'color': category_color} if category_color else {
-                'color': '#ffffff'}
-            category, created = Category.objects.get_or_create(name=category_name, defaults=category_defaults)
+            category, created = Category.objects.get_or_create(name=category_name, defaults={'color': category_color})
             instance.category = category
 
         instance.title = validated_data.get('title', instance.title)
@@ -100,3 +114,5 @@ class TaskSerializer(serializers.ModelSerializer):
                     Subtask.objects.create(task=instance, **subtask_data)
 
         return instance
+
+

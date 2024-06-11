@@ -77,9 +77,13 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         try:
-            category_data = serializer.validated_data.pop('category', None)
-            if category_data:
-                category, created = Category.objects.get_or_create(**category_data)
+            validated_data = serializer.validated_data
+            category_name = validated_data.pop('category')
+            category_color = validated_data.pop('categoryColor',
+                                                None)  # Verwenden Sie einen Standardwert von None, wenn 'categoryColor' nicht vorhanden ist
+            if category_color is not None:
+                category, created = Category.objects.get_or_create(name=category_name,
+                                                                   defaults={'color': category_color})
                 serializer.validated_data['category'] = category
             serializer.save()
         except Exception as e:
