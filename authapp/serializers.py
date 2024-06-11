@@ -73,11 +73,9 @@ class TaskSerializer(serializers.ModelSerializer):
         category_color = validated_data.pop('categoryColor', None)
         if category_name:
             category_defaults = {'color': category_color} if category_color else {
-                'color': '#ffffff'}  # Default color white
+                'color': '#ffffff'}
             category, created = Category.objects.get_or_create(name=category_name, defaults=category_defaults)
             instance.category = category
-
-        # Rest of your update method...
 
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
