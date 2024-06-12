@@ -1,7 +1,5 @@
-from rest_framework import serializers, status
+from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework.response import Response
-
 from authapp.models import Contact, Task, Subtask, Category
 
 User = get_user_model()
@@ -61,7 +59,6 @@ class TaskSerializer(serializers.ModelSerializer):
         category_name = validated_data.pop('category')
         category_color = validated_data.pop('categoryColor', None)
 
-        # Hier speichern wir den Farbwert direkt
         validated_data['category'] = category_name
         validated_data['categoryColor'] = category_color if category_color else '#ffffff'
 
