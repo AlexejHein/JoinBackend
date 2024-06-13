@@ -27,16 +27,16 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'email', 'phone', 'color']
 
 
-class SubtaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subtask
-        fields = ['name', 'completed']
-
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'color']
+
+
+class SubtaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtask
+        fields = ['name', 'completed']
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -88,18 +88,9 @@ class TaskSerializer(serializers.ModelSerializer):
         instance.save()
 
         if subtasks_data is not None:
+            # Lösche alle vorhandenen Subtasks und erstelle neue basierend auf den gesendeten Daten
+            instance.subtasks.all().delete()
             for subtask_data in subtasks_data:
-                subtask_id = subtask_data.get('id')
-                if subtask_id:
-                    try:
-                        subtask = Subtask.objects.get(id=subtask_id, task=instance)
-                    except Subtask.DoesNotExist:
-                        subtask = Subtask.objects.create(task=instance, **subtask_data)
-                    subtask.name = subtask_data.get('name', subtask.name)
-                    subtask.completed = subtask_data.get('completed', subtask.completed)
-                    subtask.save()
-                else:
-                    Subtask.objects.create(task=instance, **subtask_data)
+                Subtask.objects.create(task=instance, **subtask_data)
 
         return instance
-
