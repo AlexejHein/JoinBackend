@@ -37,6 +37,7 @@ class RegisterView(generics.CreateAPIView):
         if serializer.is_valid():
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print("Validation errors:", serializer.errors)  # Debugging-Ausgabe
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -88,7 +89,6 @@ class UpdateTaskStatusView(APIView):
 
     def put(self, request, pk, *args, **kwargs):
         print("Request data:", request.data)
-
         try:
             task = get_object_or_404(Task, id=pk)
         except Task.DoesNotExist:

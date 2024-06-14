@@ -20,6 +20,15 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def validate(self, data):
+        if 'email' not in data or not data['email']:
+            raise serializers.ValidationError("Email is required.")
+        if 'username' not in data or not data['username']:
+            raise serializers.ValidationError("Username is required.")
+        if 'password' not in data or not data['password']:
+            raise serializers.ValidationError("Password is required.")
+        return data
+
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
@@ -88,7 +97,6 @@ class TaskSerializer(serializers.ModelSerializer):
         instance.save()
 
         if subtasks_data is not None:
-            # Lösche alle vorhandenen Subtasks und erstelle neue basierend auf den gesendeten Daten
             instance.subtasks.all().delete()
             for subtask_data in subtasks_data:
                 Subtask.objects.create(task=instance, **subtask_data)
